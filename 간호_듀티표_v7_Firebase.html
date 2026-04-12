@@ -351,6 +351,7 @@ function App(){
   const[newWN,setNewWN]=useState('');const[newNP,setNewNP]=useState('');
   const[newNurse,setNewNurse]=useState('');
   const[toast,setToast]=useState('');
+  const[showManual,setShowManual]=useState(false);
   const[isSaving,setIsSaving]=useState(false);
   const[nhD,setNhD]=useState('');const[nhN,setNhN]=useState('');
   const[wdPwI,setWdPwI]=useState({});
@@ -548,6 +549,42 @@ function App(){
     </div>
   </>);
 
+  const Manual=()=>(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.55)',zIndex:9990,display:'flex',alignItems:'flex-start',justifyContent:'center',padding:16,overflowY:'auto'}} onClick={()=>setShowManual(false)}>
+    <div style={{background:'#fff',borderRadius:14,width:'100%',maxWidth:780,margin:'auto'}} onClick={e=>e.stopPropagation()}>
+      <div style={{background:'linear-gradient(90deg,#1a3a6b,#2a5298)',color:'#fff',padding:'22px 28px',borderRadius:'14px 14px 0 0',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div><div style={{fontSize:18,fontWeight:700}}>📖 사용설명서</div><div style={{fontSize:12,opacity:.8}}>간호 듀티표 관리 시스템 · 제작 JM</div></div>
+        <button onClick={()=>setShowManual(false)} style={{background:'rgba(255,255,255,.2)',border:'none',color:'#fff',fontSize:13,fontWeight:700,padding:'6px 14px',borderRadius:6}}>✕ 닫기</button>
+      </div>
+      <div style={{padding:'0 28px 28px',maxHeight:'78vh',overflowY:'auto'}}>
+        {[
+          {t:'🏥 프로그램 개요',b:<p style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>병동별 간호 듀티표 작성, 수당 자동 계산, 근무 연속 위반 감지, 간호관리료 차등제 등급 통합 관리 시스템입니다.<br/><b>Firebase 클라우드</b>로 여러 PC에서 데이터를 실시간 공유할 수 있습니다.</p>},
+          {t:'📋 듀티표 작성',b:<div style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>셀을 <b>클릭</b>할 때마다 근무 유형이 순환됩니다.<br/><b>D</b>=데이(8h) · <b>E</b>=이브닝(8h) · <b>N</b>=나이트(8h) · <b>O</b>=오프 · <b>휴</b>=휴일 · <b>연</b>=연차 · <b>반</b>=반차(4h) · <b>교</b>=교육<br/>변경 후 <b>2초 뒤 자동 저장</b>됩니다.</div>},
+          {t:'💰 수당 계산 방식',b:<div style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>
+            <b>① 연장수당</b> = 연장h × 기본시급 × 0.5 (주 40h 초과분, 근기법 제50조)<br/>
+            <b>② 야간간호특별수당</b> = 야간h × 야간가산시급<br/>
+            → 병원이 건강보험심사평가원에서 <b>야간간호료 수가를 수령한 경우에만</b> 발생합니다.<br/>
+            → <b>시급관리 탭</b>에서 해당 간호사의 "야간특별수당 지급" 체크박스를 ON으로 설정해야 계산됩니다.<br/>
+            → 체크박스가 OFF인 간호사는 N근무가 있어도 야간가산금 = 0원입니다.
+          </div>},
+          {t:'⚠️ 근무 연속 제한 규칙',b:<div style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>
+            <span style={{color:'#A32D2D',fontWeight:600}}>오류(빨강):</span> 야간→데이 · 4연속 야간 · 7연속 근무<br/>
+            <span style={{color:'#854F0B',fontWeight:600}}>주의(주황):</span> 야간→이브닝 · 3연속 야간 · 5연속 근무 · 데이→야간
+          </div>},
+          {t:'☁️ Firebase 클라우드 저장',b:<div style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>
+            셀 변경 후 <b>2초</b>, 설정 변경 후 <b>3초</b> 내 자동 저장됩니다.<br/>
+            어느 PC에서나 같은 GitHub 주소로 접속하면 동일한 데이터를 사용할 수 있습니다.<br/>
+            <b>불러오기</b> 버튼으로 언제든지 최신 데이터를 받을 수 있습니다.
+          </div>},
+          {t:'📊 간호관리료 차등제',b:<div style={{fontSize:12.5,color:'#444',lineHeight:1.8}}>
+            계산: 입원환자수 ÷ 일평균 근무 간호사수 = 비율 → 1~7등급<br/>
+            1등급(2.0미만) · 2등급(2.5미만) · 3등급(3.0미만) · 4등급(3.5미만) · 5등급(4.0미만) · 6등급(5.0미만) · 7등급(초과)
+          </div>},
+        ].map((s,i)=>(<div key={i} style={{borderBottom:'1px solid #eee',padding:'16px 0'}}><div style={{fontSize:14,fontWeight:700,color:'#1a3a6b',marginBottom:8}}>{s.t}</div>{s.b}</div>))}
+        <div style={{textAlign:'center',padding:'12px 0 0',color:'#aaa',fontSize:11}}>제작 JM · 수정문의 010-5570-1571 · ※ 모든 계산은 참고용, 실제 급여는 노무사 확인 권장</div>
+      </div>
+    </div>
+  </div>);
+
   const AB=(ex={})=>({padding:'5px 12px',fontSize:12,borderRadius:6,...ex});
   const tabList=isAdmin
     ?[['grid','듀티표'],['allowance','수당요약'],['violations',`위반${msgs.length>0?`(${msgs.length})`:''}`,],['summary','근무현황'],['rates','시급관리'],['wards','병동·비밀번호'],['nurses','간호사관리'],['holidays','공휴일'],['settings','관리자설정']]
@@ -556,6 +593,7 @@ function App(){
   return(
     <div id="app-wrap" style={{minHeight:'100vh',padding:'10px 14px',background:'#f0f2f5'}}>
       <PP/>
+      {showManual&&<Manual/>}
       {toast&&<div className="toast">{toast}</div>}
 
       {/* 헤더 */}
@@ -589,6 +627,7 @@ function App(){
           {alerts.length>0&&<span className="badge" style={{background:'#FAEEDA',color:'#854F0B',border:'1px solid #FAC775'}}>인원미달 {alerts.length}건</span>}
         </div>
         <div style={{display:'flex',gap:5,flexWrap:'wrap',alignItems:'center'}}>
+          <button onClick={()=>setShowManual(true)} style={AB({background:'#FFF8E1',color:'#854F0B',border:'1px solid #FAC775',fontWeight:700})}>📖 사용설명서</button>
           <button onClick={()=>setSc(autoGen(wNurses,y,m,ward.req))} style={AB({background:'#EEEDFE',color:'#534AB7',border:'1px solid #CECBF6',fontWeight:600})}>자동배치</button>
           <button onClick={exportXlsx} style={AB({background:'#EAF3DE',color:'#3B6D11',border:'1px solid #C0DD97',fontWeight:600})}>엑셀저장</button>
           <button onClick={loadAll} disabled={isSaving} style={AB({background:'#FFF8E1',color:'#854F0B',border:'1px solid #FAC775',fontWeight:600,opacity:isSaving?.6:1})}>
